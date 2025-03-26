@@ -29,7 +29,7 @@ async def rakuten_html(req: Request):
 
     try:
         # 楽天ページを取得（PC版）
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=30)
         soup = BeautifulSoup(response.text, "html.parser")
 
         # meta description の取得
