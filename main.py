@@ -1,6 +1,6 @@
-# ? Å¬\¬‚ÌŠy“VAPI ~ GPTS ’†ŒpƒT[ƒo[ìƒR[ƒhiOCR‹@”\•t‚«j
+# âœ… æœ€å°æ§‹æˆã®æ¥½å¤©API Ã— GPTS ä¸­ç¶™ã‚µãƒ¼ãƒãƒ¼è©¦ä½œã‚³ãƒ¼ãƒ‰ï¼ˆOCRæ©Ÿèƒ½ä»˜ãï¼‰
 
-# •K—v‚Èƒ‰ƒCƒuƒ‰ƒŠ
+# å¿…è¦ãªãƒ©ã‚¤ãƒ–ãƒ©ãƒª
 # pip install fastapi uvicorn requests pillow pytesseract beautifulsoup4
 
 from fastapi import FastAPI, Request
@@ -14,7 +14,7 @@ import re
 
 app = FastAPI()
 
-# CORSİ’èiGPTS‚©‚ç‚ÌƒŠƒNƒGƒXƒg‹–‰Âj
+# CORSè¨­å®šï¼ˆGPTSã‹ã‚‰ã®ãƒªã‚¯ã‚¨ã‚¹ãƒˆè¨±å¯ï¼‰
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,8 +23,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Šy“VURL‚ğƒXƒ}ƒz”Å‚É•ÏŠ·
+# æ¥½å¤©URLã‚’ã‚¹ãƒãƒ›ç‰ˆã«å¤‰æ›ï¼ˆæœ«å°¾ã‚¹ãƒ©ãƒƒã‚·ãƒ¥ï¼†ã‚¯ã‚¨ãƒªé™¤å»å¯¾å¿œï¼‰
 def convert_to_mobile_url(url: str) -> str:
+    url = url.split("?")[0]
+    if not url.endswith("/"):
+        url += "/"
     match = re.match(r"https://item\.rakuten\.co\.jp/([^/]+)/([^/]+)/", url)
     if match:
         shop, item = match.groups()
@@ -37,16 +40,16 @@ async def rakuten_ocr(req: Request):
     url = body.get("url")
 
     if not url:
-        return {"error": "Šy“VURL‚ª•K—v‚Å‚·"}
+        return {"error": "æ¥½å¤©URLãŒå¿…è¦ã§ã™"}
 
     mobile_url = convert_to_mobile_url(url)
 
     try:
-        # ƒXƒ}ƒz”Åƒy[ƒW‚ğæ“¾
+        # ã‚¹ãƒãƒ›ç‰ˆãƒšãƒ¼ã‚¸ã‚’å–å¾—
         response = requests.get(mobile_url, timeout=10)
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # ¤•i‰æ‘œ‚ğæ“¾iALT‘®«‚Ü‚½‚ÍƒTƒCƒY‚ÅƒtƒBƒ‹ƒ^j
+        # å•†å“ç”»åƒã‚’å–å¾—ï¼ˆALTå±æ€§ã¾ãŸã¯ã‚µã‚¤ã‚ºã§ãƒ•ã‚£ãƒ«ã‚¿ï¼‰
         all_images = soup.find_all("img")
         filtered_images = []
 
@@ -59,7 +62,7 @@ async def rakuten_ocr(req: Request):
             if not src or not src.startswith("http"):
                 continue
 
-            # alt‚É¤•ià–¾‚ªŠÜ‚Ü‚ê‚éA‚Ü‚½‚Í‰æ‘œƒTƒCƒY‚ª’†?‘å‚«‚ß‚È‚à‚Ì‚ğ—Dæ
+            # altã«å•†å“èª¬æ˜ãŒå«ã¾ã‚Œã‚‹ã€ã¾ãŸã¯ç”»åƒã‚µã‚¤ã‚ºãŒä¸­ã€œå¤§ãã‚ãªã‚‚ã®ã‚’å„ªå…ˆ
             if alt or (width and height and int(width) > 100 and int(height) > 100):
                 filtered_images.append(src)
 
@@ -82,7 +85,7 @@ async def rakuten_ocr(req: Request):
 
         return {
             "mobile_url": mobile_url,
-            "extracted_text": combined_text or "‰æ‘œ‚©‚çƒeƒLƒXƒg‚ğ’Šo‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B"
+            "extracted_text": combined_text or "ç”»åƒã‹ã‚‰ãƒ†ã‚­ã‚¹ãƒˆã‚’æŠ½å‡ºã§ãã¾ã›ã‚“ã§ã—ãŸã€‚"
         }
 
     except Exception as e:
