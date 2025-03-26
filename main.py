@@ -46,7 +46,7 @@ async def rakuten_ocr(req: Request):
 
     try:
         # スマホ版ページを取得
-        response = requests.get(mobile_url, timeout=10)
+        response = requests.get(mobile_url, timeout=20)
         soup = BeautifulSoup(response.text, "html.parser")
 
         # 商品画像を取得（ALT属性またはサイズでフィルタ）
@@ -73,7 +73,7 @@ async def rakuten_ocr(req: Request):
 
         for img_url in filtered_images:
             try:
-                img_response = requests.get(img_url, timeout=10)
+                img_response = requests.get(img_url, timeout=20)
                 image = Image.open(BytesIO(img_response.content)).convert("RGB")
                 text = pytesseract.image_to_string(image, lang="jpn")
                 if text.strip():
