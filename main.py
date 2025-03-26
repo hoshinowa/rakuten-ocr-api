@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 from PIL import Image
 import pytesseract
 from io import BytesIO
-import re
 
 app = FastAPI()
 
@@ -23,17 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 楽天URLをスマホ版に変換（末尾スラッシュ＆クエリ除去対応）
-def convert_to_mobile_url(url: str) -> str:
-    url = url.split("?")[0]
-    if not url.endswith("/"):
-        url += "/"
-    match = re.match(r"https://item\.rakuten\.co\.jp/([^/]+)/([^/]+)/", url)
-    if match:
-        shop, item = match.groups()
-        return f"https://m.rakuten.co.jp/{shop}/n/{item}/"
-    return url
-
 @app.post("/rakuten-ocr")
 async def rakuten_ocr(req: Request):
     body = await req.json()
@@ -42,11 +30,9 @@ async def rakuten_ocr(req: Request):
     if not url:
         return {"error": "楽天URLが必要です"}
 
-    mobile_url = convert_to_mobile_url(url)
-
     try:
-        # スマホ版ページを取得
-        response = requests.get(mobile_url, timeout=20)
+        # 楽天のPC版ページを取得（スマホ版への変換なし）
+        response = requests.get(url, timeout=20)
         soup = BeautifulSoup(response.text, "html.parser")
 
         # 商品画像を取得（ALT属性またはサイズでフィルタ）
@@ -84,7 +70,7 @@ async def rakuten_ocr(req: Request):
         combined_text = "\n".join(image_texts)
 
         return {
-            "mobile_url": mobile_url,
+            "source_url": url,
             "extracted_text": combined_text or "画像からテキストを抽出できませんでした。"
         }
 
